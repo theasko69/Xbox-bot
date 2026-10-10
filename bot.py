@@ -32,6 +32,11 @@ def main():
     new = {}
 
     data = get_friends()
+    # OpenXBL enveloppe parfois la réponse dans {"content": ..., "code": ...}
+    if isinstance(data, dict) and "content" in data:
+        data = data["content"]
+    if isinstance(data, str):
+        data = json.loads(data)
     people = data.get("people", []) if isinstance(data, dict) else data
     print(len(people), "amis reçus de OpenXBL")
     if not people and os.environ.get("GITHUB_EVENT_NAME") == "workflow_dispatch":
