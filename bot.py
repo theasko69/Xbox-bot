@@ -31,7 +31,12 @@ def main():
     old = {} if first_run else json.load(open(STATE_FILE))
     new = {}
 
-    for p in get_friends():
+    people = get_friends()
+    print(len(people), "amis reçus de OpenXBL")
+    if people:
+        print("Exemple de champs :", list(people[0].keys()))
+
+    for p in people:
         name = p.get("gamertag", "?")
         if WANTED and name.lower() not in WANTED:
             continue
@@ -49,5 +54,13 @@ def main():
 
     json.dump(new, open(STATE_FILE, "w"))
 
+    if os.environ.get("GITHUB_EVENT_NAME") == "workflow_dispatch":
+        en_ligne = [n for n, v in new.items() if v["online"]]
+        send(
+            f"✅ Bot actif : {len(people)} amis reçus, {len(new)} suivis, "
+            f"{len(en_ligne)} connectés ({', '.join(en_ligne) or 'personne'})"
+        )
+
 
 main()
+        
