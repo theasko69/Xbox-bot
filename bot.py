@@ -15,7 +15,7 @@ def get_friends():
         headers={"X-Authorization": XBL_KEY, "Accept": "application/json", "User-Agent": "xbox-bot"},
     )
     with urllib.request.urlopen(req, timeout=30) as r:
-        return json.load(r).get("people", [])
+        return json.load(r)
 
 
 def send(text):
@@ -31,10 +31,16 @@ def main():
     old = {} if first_run else json.load(open(STATE_FILE))
     new = {}
 
-    people = get_friends()
+    data = get_friends()
+    people = data.get("people", []) if isinstance(data, dict) else data
     print(len(people), "amis reçus de OpenXBL")
-    if people:
-        print("Exemple de champs :", list(people[0].keys()))
+    if not people and os.environ.get("GITHUB_EVENT_NAME") == "workflow_dispatch":
+        # Diagnostic envoyé sur Discord (pas dans les logs publics)
+        if isinstance(data, dict):
+            infos = {k: (f"liste de {len(v)}" if isinstance(v, list) else str(v)[:150]) for k, v in data.items()}
+        else:
+            infos = str(type(data))
+        send(f"🔎 Réponse OpenXBL : {infos}")
 
     for p in people:
         name = p.get("gamertag", "?")
@@ -63,4 +69,3 @@ def main():
 
 
 main()
-        
