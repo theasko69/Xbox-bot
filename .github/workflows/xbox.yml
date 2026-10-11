@@ -4,6 +4,8 @@ on:
   schedule:
     - cron: "*/5 * * * *"
   workflow_dispatch:
+  repository_dispatch:
+    types: [check]
 
 jobs:
   check:
@@ -24,3 +26,4 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
           FRIENDS: ${{ secrets.FRIENDS }}
         run: python bot.py
+        
